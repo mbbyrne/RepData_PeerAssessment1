@@ -10,67 +10,62 @@ output:
 
 Load the data from the working directory
 
-```{r echo=TRUE}
-    
-    activity<-read.csv("activity.csv",stringsAsFactors=F)
 
+```r
+    activity<-read.csv("activity.csv",stringsAsFactors=F)
 ```
 
 Format Date Column and remove 'NA' results
 
-```{r echo=TRUE}
-    
+
+```r
     activity$date_formatted<-as.Date(activity$date,"%Y-%m-%d")
     
     activitysub<-activity[!is.na(activity$steps),]
-
 ```
 
 ## What is mean total number of steps taken per day?
 
 Calculate total steps for each day, mean steps and median steps
 
-```{r echo=TRUE}
 
+```r
     dailysteps<-aggregate(steps~date_formatted,
                           FUN=sum,
                           data=activitysub)
 
-
     meansteps<-mean(dailysteps$steps)
     meanstepsr<-formatC(meansteps,6)
     mediansteps<-median(dailysteps$steps)
-
 ```
 
 Plot histogram of Total Number of Steps Taken Each Day and report the mean and median total steps taken per day
 
-```{r echo=TRUE}
 
+```r
     hist(dailysteps$steps,
          col.axis="purple",
          main="Total Number of Steps Taken Each Day",
          xlab="Number of Steps",
          col="blue")
 
-
     abline(v=meansteps,
            col="green",
            lty=9,
            lwd=3)
-
-
 ```
 
-###The mean steps taken per day is: `r meanstepsr`
-###The median steps taken per day is: `r mediansteps`
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
+
+###The mean steps taken per day is: 10766.2
+###The median steps taken per day is: 10765
 
 ## What is the average daily activity pattern?
 
 Calculate mean steps for each timepont
 
-```{r echo=TRUE}
 
+```r
 tptmeans<-aggregate(steps~interval,
                      FUN=mean,
                      data=activitysub)
@@ -78,15 +73,13 @@ tptmeans<-aggregate(steps~interval,
 maxsteps<-tptmeans[tptmeans$steps == max(tptmeans$steps),]
 
 maxint<-(maxsteps$interval)
-
-
 ```
 
 Plot time series of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). Report the five minute interval on average across all the days in the dataset which contains the maximum number of steps
 
 
-```{r echo=TRUE}
 
+```r
 plot(x=tptmeans$interval,
     y=tptmeans$steps,
     type='l',
@@ -101,10 +94,11 @@ abline(v=maxsteps$interval,
        col="red",
        lty=9,
        lwd=2)
-       
 ```
 
-###The five minute interval with the maximum number of steps is : `r maxint`
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
+###The five minute interval with the maximum number of steps is : 835
 
 
 ## Imputing missing values
@@ -116,10 +110,9 @@ Calculate mean steps for each timepont. Round the calculated mean to the nearest
 
 Calculate total steps for each day and the mean and median steps
 
-```{r echo=TRUE}
 
-```{r echo=TRUE}
 
+```r
 rowsmissing<-sum(!complete.cases(activity))
 
 timepoint_means<-aggregate(steps~interval,
@@ -134,7 +127,6 @@ activitytpt<- merge(activity,timepoint_means,by="interval")
 
 activityimp=transform(activitytpt,steps = ifelse(is.na(steps),steps_imputed,steps))
 
-
     dailystepsimp<-aggregate(steps~date_formatted,
                             FUN=sum,
                             data=activityimp)
@@ -142,13 +134,12 @@ activityimp=transform(activitytpt,steps = ifelse(is.na(steps),steps_imputed,step
     meanstepsimp<-mean(dailystepsimp$steps)
     meanstepsimpr<-formatC(meanstepsimp,6)
     medianstepsimp<-formatC(median(dailystepsimp$steps),6)
-
 ```
 
 Plot histogram of steps per day and report the mean and median total steps taken 
 
-```{r echo=TRUE}
 
+```r
     hist(dailystepsimp$steps,
          col.axis="purple",
          main="Total Number of Steps Taken Each Day (after imputing)",
@@ -162,11 +153,13 @@ abline(v=meanstepsimp,
        lwd=3)
 ```
 
-###Number of rows missing data is: `r rowsmissing`
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
+
+###Number of rows missing data is: 2304
 
 ###For data set with imputed values:
-###The mean steps taken per day is: `r meanstepsimpr`
-###The median steps taken per day is: `r medianstepsimp`
+###The mean steps taken per day is: 10765.6
+###The median steps taken per day is:   10762
 
 Mean and Median values decrease when using rounded timepoint means for each timepoint to impute missing values
 
@@ -176,8 +169,8 @@ Use weekday fuction to get day of the week for each date.
 Split into weekday and weekend - create factor variable "wday"
 Calculate means per day type and interval
 
-```{r echo=TRUE}
 
+```r
     wdaystrans<-transform(activityimp,weekday=weekdays(date_formatted))
     
     wdaysimp=transform(wdaystrans,wday = ifelse(wdaystrans$weekday %in% c("Saturday", "Sunday"),"weekend","weekday"))
@@ -189,15 +182,14 @@ Calculate means per day type and interval
                              data=wdaysimp)
 
     #maxsteps2<-meansteps2[meansteps2$steps == max(meansteps2$steps),]
-
 ```
 
 Plot time series - create panel plot using lattice plotting system
 5 minute interval is placed on the x-axis. Average steps taken on the y-axis
 Divided into panel for weekdays and for weekend days
 
-```{r echo=TRUE}
 
+```r
     library(lattice)
     
     xyplot(steps~interval|wday,
@@ -207,5 +199,6 @@ Divided into panel for weekdays and for weekend days
             main="Time Series Plot - Average steps taken per 5-minute interval",
             xlab="Interval",
             ylab="Number of steps")
-       
-```       
+```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
